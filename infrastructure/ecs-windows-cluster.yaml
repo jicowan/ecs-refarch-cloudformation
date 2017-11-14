@@ -113,31 +113,31 @@ Resources:
             #Need to someone to check this section.  Was unable to find a good example in YAML for bootstrapping an instance.
             UserData: 
                 "Fn::Base64": !Sub |
-                    <script>
-                    cfn-init.exe -v --region ${AWS::Region} --stack ${AWS::StackName} --resource ECSLaunchConfiguration
-                    cfn-signal.exe -e %ERRORLEVEL%
-                    <script>
+                    - '<script>'
+                    - 'cfn-init.exe -v --region ' !Ref 'AWS::Region' ' --stack ' !Ref 'AWS::StackName' '--resource ' !Ref 'ECSLaunchConfiguration'
+                    - 'cfn-signal.exe -e %ERRORLEVEL%'
+                    - '</script>'
         Metadata:
             AWS::CloudFormation::Init:
                 config:
                     commands:
                         01_add_instance_to_cluster:
                             #Will this work?  What if the command is multiple lines?
-                            command: !Sub Configure-ECSAgent -ClusterName ${ECSCluster} -Version 'latest'
+                            command: !Sub 'Initialize-ECSAgent -Cluster ' !Ref 'ECSCluster'
                     files:
                         #Not sure this is right
-                        "c:\\cfn\\cfn-hup.conf":
-                            content: !Sub |
+                        c:\cfn\cfn-hup.conf:
+                            content: !Sub
                                 [main]
-                                stack=${AWS::StackId}
-                                region=${AWS::Region}
+                                'stack=' !Ref 'AWS::StackId'
+                                'region=' !Ref 'AWS::Region'
                         
-                        "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf":
+                        c:\cfn\hooks.d\cfn-auto-reloader.conf:
                             content: !Sub |
                                 [cfn-auto-reloader-hook]
-                                triggers=post.update
-                                path=Resources.ECSLaunchConfiguration.Metadata.AWS::CloudFormation::Init
-                                action=cfn-init.exe -v --region ${AWS::Region} --stack ${AWS::StackName} --resource ECSLaunchConfiguration
+                                'triggers=post.update'
+                                'path=Resources.ECSLaunchConfiguration.Metadata.AWS::CloudFormation::Init'
+                                'action=cfn-init.exe -v --region ', !Ref 'AWS::Region', ' --stack ', !Ref 'AWS::StackName' ' --resource ECSLaunchConfiguration'
 
                     services: 
                         sysvinit:
