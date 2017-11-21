@@ -45,27 +45,7 @@ Mappings:
 
     AWSRegionToAMI:
         us-east-2:
-            AMI: Windows-AMI
-        us-east-1:
-            AMI: Windows-AMI
-        us-west-2:
-            AMI: Windows-AMI
-        us-west-1:
-            AMI: Windows-AMI
-        eu-west-2:
-            AMI: Windows-AMI
-        eu-west-1:
-            AMI: Windows-AMI
-        eu-central-1:
-            AMI: Windows-AMI
-        ap-northeast-1:
-            AMI: Windows-AMI
-        ap-southeast-2:
-            AMI: Windows-AMI
-        ap-southeast-1:
-            AMI: Windows-AMI
-        ca-central-1:
-            AMI: Windows-AMI
+            AMI: ami-8d4191f5
 
 Resources:
 
@@ -121,9 +101,11 @@ Resources:
             AWS::CloudFormation::Init:
                 config:
                     commands:
-                        01_add_instance_to_cluster:
+                        01_import_ECSTools:
                             #Will this work?  What if the command is multiple lines?
-                            command: !Sub 'Initialize-ECSAgent -Cluster ' !Ref 'ECSCluster'
+                            command: !Sub 'Import-Module ECSTools'
+                        02_add_instance_to_cluster:
+                            command: !Sub 'Initialize-ECSAgent -Cluster' !Ref 'ECSCluster'
                     files:
                         #Not sure this is right
                         c:\cfn\cfn-hup.conf:
