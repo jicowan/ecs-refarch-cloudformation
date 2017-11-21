@@ -91,12 +91,25 @@ Resources:
                 - !Ref SecurityGroup
             IamInstanceProfile: !Ref ECSInstanceProfile
             #Need to someone to check this section.  Was unable to find a good example in YAML for bootstrapping an instance.
-            UserData:
-                Fn::Base64: !Sub |
-                    <script>
-                    cfn-init.exe -v -s ${StackId} -r ECSLaunchConfiguration --region ${Region}
-                    cfn-signal.exe -e %ERRORLEVEL%
-                    </script>
+            UserData: !Base64: 
+                Fn::Join:
+                    - ''
+                    - - '<script>
+                        
+                        '
+                      - 'cfn-init.exe -v -s '
+                      - !Ref 'AWS::StackId'
+                      - ' -r ECSLaunchConfiguration'
+                      - ' --region '
+                      - !Ref 'AWS::Region'
+                      - '
+
+                        '
+                      - 'cfn-signal.exe -e %ERRORLEVEL% '
+                      - '
+                        
+                        '
+                      - </script>
         Metadata:
             AWS::CloudFormation::Init:
                 config:
