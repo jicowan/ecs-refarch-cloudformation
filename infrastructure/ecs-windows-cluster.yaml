@@ -93,10 +93,10 @@ Resources:
             #Need to someone to check this section.  Was unable to find a good example in YAML for bootstrapping an instance.
             UserData: !Base64
                 <powershell>
-                'Import-Module ECSTools'
-                'Initialize-ECSAgent -Cluster ' !Ref ECSCluster ' -EnableTaskIAMRole'
+                Import-Module ECSTools
+                Initialize-ECSAgent -Cluster ${ECSCluster} -EnableTaskIAMRole
                 </powershell>
-                
+
     # This IAM Role is attached to all of the ECS hosts. It is based on the default role
     # published here:
     # http://docs.aws.amazon.com/AmazonECS/latest/developerguide/instance_IAM_role.html
