@@ -105,7 +105,11 @@ Resources:
                       - '
 
                         '
-                      - 'cfn-signal.exe -e %ERRORLEVEL% '
+                      - 'cfn-signal.exe -e $lastexitcode --stack '
+                      - !Ref 'AWS::StackName'
+                      - ' --resource ECSAutoScalingGroup '
+                      - ' --region '
+                      - !Ref 'AWS::Region'
                       - '
                         
                         '
