@@ -93,10 +93,39 @@ Resources:
             #Need to someone to check this section.  Was unable to find a good example in YAML for bootstrapping an instance.
             UserData:
                 Fn::Base64: !Sub |
-                    <powershell>
-                    Import-Module ECSTools
-                    Initialize-ECSAgent -Cluster ${ECSCluster} -EnableTaskIAMRole
-                    </powershell>
+                    <script>
+                    cfn-init.exe -v -s ${StackId} -r ECSLaunchConfiguration --region ${Region}
+                    cfn-signal.exe -e %ERRORLEVEL%
+                    </script>
+        Metadata:
+            AWS::CloudFormation::Init:
+                config:
+                    commands:
+                        01_import_powershell_module:
+                            command: !Sub powershell.exe -Command Import-Module ECSTools
+                        02_add_instance_to_cluster:
+                            command: !Sub powershell.exe -Command Initialize-ECSAgent -Cluster ${ECSCluster} -EnableTaskIAMRole
+                    files:
+                        c:\cfn\cfn-hup.conf:
+                            content: !Join ['', ['[main]
+                                    ', stack=, !Ref 'AWS::StackId', '
+                                    ', region=, !Ref 'AWS::Region', '
+                                    ']]
+                        c:\cfn\hooks.d\cfn-auto-reloader.conf:
+                            content: !Join ['', ['[cfn-auto-reloader-hook]
+                                    ', 'triggers=post.update
+                                    ', 'path=Resources.ECSLaunchConfiguration.Metadata.AWS::CloudFormation::Init
+                                    ', 'action=cfn-init.exe -v -s ', !Ref 'AWS::StackId', ' -r ECSLaunchConfiguration',
+                                    ' --region ', !Ref 'AWS::Region', '
+                                    ']]
+                    services: 
+                        windows:
+                            cfn-hup: 
+                                enabled: 'true'
+                                ensureRunning: 'true'
+                                files: 
+                                    - c:\cfn\cfn-hup.conf
+                                    - c:\etc\cfn\hooks.d\cfn-auto-reloader.conf
 
     # This IAM Role is attached to all of the ECS hosts. It is based on the default role
     # published here:
