@@ -91,7 +91,7 @@ Resources:
                 - !Ref SecurityGroup
             IamInstanceProfile: !Ref ECSInstanceProfile
             #Need to someone to check this section.  Was unable to find a good example in YAML for bootstrapping an instance.
-            UserData: !Base64: 
+            UserData: !Base64 
                 Fn::Join:
                     - ''
                     - - '<script>
