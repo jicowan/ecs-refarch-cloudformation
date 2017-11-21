@@ -93,43 +93,10 @@ Resources:
             #Need to someone to check this section.  Was unable to find a good example in YAML for bootstrapping an instance.
             UserData: 
                 "Fn::Base64": !Sub |
-                    - '<script>'
-                    - 'cfn-init.exe -v --region ' !Ref 'AWS::Region' ' --stack ' !Ref 'AWS::StackName' '--resource ' !Ref 'ECSLaunchConfiguration'
-                    - 'cfn-signal.exe -e %ERRORLEVEL%'
-                    - '</script>'
-        Metadata:
-            AWS::CloudFormation::Init:
-                config:
-                    commands:
-                        01_import_ECSTools:
-                            #Will this work?  What if the command is multiple lines?
-                            command: !Sub 'Import-Module ECSTools'
-                        02_add_instance_to_cluster:
-                            command: !Sub 'Initialize-ECSAgent -Cluster' !Ref 'ECSCluster'
-                    files:
-                        #Not sure this is right
-                        c:\cfn\cfn-hup.conf:
-                            content: !Sub
-                                [main]
-                                'stack=' !Ref 'AWS::StackId'
-                                'region=' !Ref 'AWS::Region'
-                        
-                        c:\cfn\hooks.d\cfn-auto-reloader.conf:
-                            content: !Sub |
-                                [cfn-auto-reloader-hook]
-                                'triggers=post.update'
-                                'path=Resources.ECSLaunchConfiguration.Metadata.AWS::CloudFormation::Init'
-                                'action=cfn-init.exe -v --region ', !Ref 'AWS::Region', ' --stack ', !Ref 'AWS::StackName' ' --resource ECSLaunchConfiguration'
-
-                    services: 
-                        sysvinit:
-                            cfn-hup: 
-                                enabled: true
-                                ensureRunning: true
-                                files: 
-                                    #Is this right?
-                                    - c:\cfn\cfn-hup.conf
-                                    - c:\cfn\hooks.d\cfn-auto-reloader.conf
+                    - '<powershell>'
+                    - 'Import-Module ECSTools'
+                    - 'Initialize-ECSAgent -Cluster ' !Ref ECSCluster ' -EnableTaskIAMRole'
+                    - '</powershell>'
 
     # This IAM Role is attached to all of the ECS hosts. It is based on the default role
     # published here:
