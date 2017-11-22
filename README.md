@@ -1,8 +1,8 @@
 # Deploying Microservices with Amazon ECS, AWS CloudFormation, and an Application Load Balancer
 
-This reference architecture provides a set of YAML templates for deploying microservices to [Amazon EC2 Container Service (Amazon ECS)](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html) with [AWS CloudFormation](https://aws.amazon.com/cloudformation/).
+This reference architecture provides a set of YAML templates for creating an [Amazon Elastic Container Service (Amazon ECS)](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html) cluster that is comprised of Windows container instances using the new ECS optimized AMI for Windows.  The stack is launched using [AWS CloudFormation](https://aws.amazon.com/cloudformation/).
 
-You can launch this CloudFormation stack in the US West (Oregon) Region in your account:
+You can only launch this CloudFormation stack in the US West (Oregon) Region in your account:
 
 [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=Production&templateURL=https://s3.amazonaws.com/ecs-refarch-cloudformation/master-windows.yaml)  
 
@@ -15,10 +15,6 @@ The repository consists of a set of nested templates that deploy the following:
  - A tiered [VPC](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Introduction.html) with public and private subnets, spanning an AWS region.
  - A highly available ECS cluster deployed across two [Availability Zones](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html) in an [Auto Scaling](https://aws.amazon.com/autoscaling/) group.
  - A pair of [NAT gateways](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/vpc-nat-gateway.html) (one in each zone) to handle outbound traffic.
- - Two interconnecting microservices deployed as [ECS services](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) (website-service and product-service). 
- - An [Application Load Balancer (ALB)](https://aws.amazon.com/elasticloadbalancing/applicationloadbalancer/) to the public subnets to handle inbound traffic.
- - ALB path-based routes for each ECS service to route the inbound traffic to the correct service.
- - Centralized container logging with [Amazon CloudWatch Logs](http://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html).
 
 ## Why use AWS CloudFormation with Amazon ECS?
 
@@ -44,38 +40,33 @@ The templates below are included in this repository and reference architecture:
 
 | Template | Description |
 | --- | --- | 
-| [master.yaml](master.yaml) | This is the master template - deploy it to CloudFormation and it includes all of the others automatically. |
+| [master-windows.yaml](master-windows.yaml) | This is the master template - deploy it to CloudFormation and it includes all of the others automatically. |
 | [infrastructure/vpc.yaml](infrastructure/vpc.yaml) | This template deploys a VPC with a pair of public and private subnets spread across two Availability Zones. It deploys an [Internet gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html), with a default route on the public subnets. It deploys a pair of NAT gateways (one in each zone), and default routes for them in the private subnets. |
 | [infrastructure/security-groups.yaml](infrastructure/security-groups.yaml) | This template contains the [security groups](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html) required by the entire stack. They are created in a separate nested template, so that they can be referenced by all of the other nested templates. |
-| [infrastructure/load-balancers.yaml](infrastructure/load-balancers.yaml) | This template deploys an ALB to the public subnets, which exposes the various ECS services. It is created in in a separate nested template, so that it can be referenced by all of the other nested templates and so that the various ECS services can register with it. |
-| [infrastructure/ecs-cluster.yaml](infrastructure/ecs-cluster.yaml) | This template deploys an ECS cluster to the private subnets using an Auto Scaling group. |
-| [services/product-service/service.yaml](services/product-service/service.yaml) | This is an example of a long-running ECS service that serves a JSON API of products. For the full source for the service, see [services/product-service/src](services/product-service/src).|
-| [services/website-service/service.yaml](services/website-service/service.yaml) | This is an example of a long-running ECS service that needs to connect to another service (product-service) via the load-balanced URL. We use an environment variable to pass the product-service URL to the containers. For the full source for this service, see [services/website-service/src](services/website-service/src). |
+| [infrastructure/ecs-windows-cluster.yaml](infrastructure/ecs-cluster.yaml) | This template deploys an ECS cluster to the private subnets using an Auto Scaling group. |
 
-After the CloudFormation templates have been deployed, the [stack outputs](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html) contain a link to the load-balanced URLs for each of the deployed microservices.
-
-![stack-outputs](images/stack-outputs.png)
+After the CloudFormation templates have been deployed, you're ready to start running Windows containers on ECS!
 
 ## How do I...?
 
 ### Get started and deploy this into my AWS account
 
-You can launch this CloudFormation stack in the US East (N. Virginia) Region in your account:
+You can launch this CloudFormation stack in the US West (Oregon) Region in your account:
 
-[![cloudformation-launch-button](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Production&templateURL=https://s3.amazonaws.com/ecs-refarch-cloudformation/master.yaml)    
+[![cloudformation-launch-button](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=Production&templateURL=https://s3.amazonaws.com/ecs-refarch-windows/master-windows.yaml)    
 
 ### Customize the templates
 
-1. [Fork](https://github.com/awslabs/ecs-refarch-cloudformation#fork-destination-box) this GitHub repository.
+1. [Fork](https://github.com/awslabs/ecs-refarch-cloudformation#fork-destination-box) this GitHub repository. TODO: UPDATE HREF 
 2. Clone the forked GitHub repository to your local machine.
 3. Modify the templates.
 4. Upload them to an Amazon S3 bucket of your choice.
-5. Either create a new CloudFormation stack by deploying the master.yaml template, or update your existing stack with your version of the templates.
+5. Either create a new CloudFormation stack by deploying the master-windows.yaml template, or update your existing stack with your version of the templates.
 
 ### Create a new ECS service
 
 1. Push your container to a registry somewhere (e.g., [Amazon ECR](https://aws.amazon.com/ecr/)).
-2. Copy one of the existing service templates in [services/*](/services).
+2. Copy one of the existing service templates in [services/*](/services). TODO: Add template for creating a Windows service.
 3. Update the `ContainerName` and `Image` parameters to point to your container image instead of the example container.
 4. Increment the `ListenerRule` priority number (no two services can have the same priority number - this is used to order the ALB path based routing rules).
 5. Copy one of the existing service definitions in [master.yaml](master.yaml) and point it at your new service template. Specify the HTTP `Path` at which you want the service exposed. 
@@ -93,7 +84,7 @@ For more information, see the [LogConfiguration](http://docs.aws.amazon.com/Amaz
 
 ### Change the ECS host instance type
 
-This is specified in the [master.yaml](master.yaml) template.
+This is specified in the [master-windows.yaml](master-windows.yaml) template.
 
 By default, [t2.large](https://aws.amazon.com/ec2/instance-types/) instances are used, but you can change this by modifying the following section:
 
@@ -115,7 +106,7 @@ The Auto Scaling group scaling policy provided by default launches and maintains
 
 It is ***not*** set up to scale automatically based on any policies (CPU, network, time of day, etc.). 
   
-If you would like to configure policy or time-based automatic scaling, you can add the [ScalingPolicy](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-policy.html) property to the AutoScalingGroup deployed in [infrastructure/ecs-cluster.yaml](infrastructure/ecs-cluster.yaml#L69).
+If you would like to configure policy or time-based automatic scaling, you can add the [ScalingPolicy](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-policy.html) property to the AutoScalingGroup deployed in [infrastructure/ecs-windows-cluster.yaml](infrastructure/ecs-windows-cluster.yaml#L57).
 
 As well as configuring Auto Scaling for the ECS hosts (your pool of compute), you can also configure scaling each individual ECS service. This can be useful if you want to run more instances of each container/task depending on the load or time of day (or a custom CloudWatch metric). To do this, you need to create [AWS::ApplicationAutoScaling::ScalingPolicy](http://docs.aws.amazon.com/pt_br/AWSCloudFormation/latest/UserGuide/aws-resource-applicationautoscaling-scalingpolicy.html) within your service template.
 
@@ -135,7 +126,7 @@ This set of templates deploys the following network design:
 | Private Subnet | 10.180.24.0/21 | 2,041 | The private subnet in the first Availability Zone |
 | Private Subnet | 10.180.32.0/21 | 2,041 | The private subnet in the second Availability Zone |
 
-You can adjust the CIDR ranges used in this section of the [master.yaml](master.yaml) template:
+You can adjust the CIDR ranges used in this section of the [master-windows.yaml](master-windows.yaml) template:
 
 ```
 VPC:
