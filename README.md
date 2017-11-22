@@ -43,7 +43,7 @@ The templates below are included in this repository and reference architecture:
 | [master-windows.yaml](master-windows.yaml) | This is the master template - deploy it to CloudFormation and it includes all of the others automatically. |
 | [infrastructure/vpc.yaml](infrastructure/vpc.yaml) | This template deploys a VPC with a pair of public and private subnets spread across two Availability Zones. It deploys an [Internet gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html), with a default route on the public subnets. It deploys a pair of NAT gateways (one in each zone), and default routes for them in the private subnets. |
 | [infrastructure/security-groups.yaml](infrastructure/security-groups.yaml) | This template contains the [security groups](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html) required by the entire stack. They are created in a separate nested template, so that they can be referenced by all of the other nested templates. |
-| [infrastructure/ecs-windows-cluster.yaml](infrastructure/ecs-cluster.yaml) | This template deploys an ECS cluster to the private subnets using an Auto Scaling group. |
+| [infrastructure/ecs-windows-cluster.yaml](infrastructure/ecs-windows-cluster.yaml) | This template deploys an ECS cluster to the private subnets using an Auto Scaling group. |
 
 After the CloudFormation templates have been deployed, you're ready to start running Windows containers on ECS!
 
@@ -69,7 +69,7 @@ You can launch this CloudFormation stack in the US West (Oregon) Region in your 
 2. Copy one of the existing service templates in [services/*](/services). TODO: Add template for creating a Windows service.
 3. Update the `ContainerName` and `Image` parameters to point to your container image instead of the example container.
 4. Increment the `ListenerRule` priority number (no two services can have the same priority number - this is used to order the ALB path based routing rules).
-5. Copy one of the existing service definitions in [master.yaml](master.yaml) and point it at your new service template. Specify the HTTP `Path` at which you want the service exposed. 
+5. Copy one of the existing service definitions in [master-windows.yaml](master-windows.yaml) and point it at your new service template. Specify the HTTP `Path` at which you want the service exposed. 
 6. Deploy the templates as a new stack, or as an update to an existing stack.
 
 ### Setup centralized container logging
@@ -106,7 +106,7 @@ The Auto Scaling group scaling policy provided by default launches and maintains
 
 It is ***not*** set up to scale automatically based on any policies (CPU, network, time of day, etc.). 
   
-If you would like to configure policy or time-based automatic scaling, you can add the [ScalingPolicy](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-policy.html) property to the AutoScalingGroup deployed in [infrastructure/ecs-windows-cluster.yaml](infrastructure/ecs-windows-cluster.yaml#L57).
+If you would like to configure policy or time-based automatic scaling, you can add the [ScalingPolicy](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-policy.html) property to the AutoScalingGroup deployed in [infrastructure/ecs-windows-cluster.yaml](infrastructure/ecs-windows-cluster.yaml).
 
 As well as configuring Auto Scaling for the ECS hosts (your pool of compute), you can also configure scaling each individual ECS service. This can be useful if you want to run more instances of each container/task depending on the load or time of day (or a custom CloudWatch metric). To do this, you need to create [AWS::ApplicationAutoScaling::ScalingPolicy](http://docs.aws.amazon.com/pt_br/AWSCloudFormation/latest/UserGuide/aws-resource-applicationautoscaling-scalingpolicy.html) within your service template.
 
