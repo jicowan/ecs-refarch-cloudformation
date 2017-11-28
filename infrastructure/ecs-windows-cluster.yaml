@@ -34,9 +34,9 @@ Mappings:
 
     # These are the latest ECS optimized AMIs as of [DATE]:
     #
-    #   amzn-ami-
-    #   ECS agent:    
-    #   Docker:       
+    #   Windows_Server-2016-English-Full-ECS_Optimized-2017.11.24
+    #   ECS agent:     
+    #   Docker: 17.06.2-ee-5      
     #   ecs-init:     
     #
     # You can find the latest available on this page of our documentation:
@@ -45,7 +45,29 @@ Mappings:
 
     AWSRegionToAMI:
         us-west-2:
-            AMI: ami-8f18c5f7
+            AMI: ami-0b60bc73
+        us-west-1:
+            AMI: ami-a8003bc8
+        us-east-2:
+            AMI: ami-b19fb1d4
+        us-east-1:
+            AMI: ami-9f1182e5
+        eu-west-2: 
+            AMI: ami-3da4bb59
+        eu-west-1:
+            AMI: ami-94d360ed
+        eu-central-1:
+            AMI: ami-b4ed61db
+        ca-central-1:
+            AMI: ami-2859e24c
+        ap-southeast-2: 
+            AMI: ami-918075f3
+        ap-southeast-1:
+            AMI: ami-ec32618f
+        ap-northeast-2:
+            AMI: ami-bb3691d5
+        ap-northeast-1:
+            AMI: ami-5ed66f38
 
 Resources:
 
